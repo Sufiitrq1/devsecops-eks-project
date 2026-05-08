@@ -1,0 +1,66 @@
+pipeline {
+  agent any
+
+  stages {
+
+    stage('Clone') {
+      steps {
+        git 'https://github.com/Sufitrq1/devsecops-eks-project.git'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        dir('app') {
+          sh 'mvn clean package'
+        }
+      }
+    }
+
+    stage('Test') {
+      steps {
+        dir('app') {
+          sh 'mvn test'
+        }
+      }
+    }
+
+    stage('SonarQube') {
+      steps {
+        dir('app') {
+          sh 'mvn sonar:sonar'
+        }
+      }
+    }
+
+    stage('Dependency Check') {
+      steps {
+        sh 'dependency-check.sh --scan app'
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        sh 'docker build -t sufiii/devsecops-app .'
+      }
+    }
+
+    stage('Trivy Scan') {
+      steps {
+        sh 'trivy image YOUR_DOCKER_USERNAME/devsecops-app'
+      }
+    }
+
+    stage('Push Image') {
+      steps {
+        sh 'docker push YOUR_DOCKER_USERNAME/devsecops-app'
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sh 'kubectl apply -f deployment.yaml'
+      }
+    }
+  }
+}
