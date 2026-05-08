@@ -5,32 +5,32 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'cd app && mvn clean package'
+                bat 'cd app && mvn clean package'
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t sufiii/devsecops-app .'
+                bat 'docker build -t sufiii/devsecops-app .'
             }
         }
 
         stage('Trivy Scan') {
             steps {
-                sh 'trivy image sufiii/devsecops-app'
+                bat 'trivy image sufiii/devsecops-app'
             }
         }
 
         stage('Docker Push') {
             steps {
-                sh 'docker push sufiii/devsecops-app'
+                bat 'docker push sufiii/devsecops-app'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
+                bat 'kubectl apply -f deployment.yaml'
+                bat 'kubectl apply -f service.yaml'
             }
         }
     }
